@@ -15,36 +15,36 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
+@RequestMapping("/api/comments")
 public class CommentController {
 
     private final CommentService commentService;
 
-    @PostMapping("/group-purchase/{gpId}/comments")
+    @PostMapping("/{gpId}")
     public ResponseEntity<Void> createComment(@AuthenticationPrincipal User user, @PathVariable Long gpId, @RequestBody CommentSaveRequest request) {
         Long commentId = commentService.save(user.getId(), gpId, request);
         return ResponseEntity.created(URI.create("/api/comments/" + commentId)).build();
     }
 
-    @GetMapping("/group-purchase/{gpId}/comments")
-    public ResponseEntity<List<CommentResponse>> getComments(@PathVariable Long gpId) {
-        List<CommentResponse> response = commentService.findAll(gpId);
+    @GetMapping
+    public ResponseEntity<List<CommentResponse>> getComments(@RequestParam Long groupPurchaseId) {
+        List<CommentResponse> response = commentService.findAll(groupPurchaseId);
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/comments/{commentId}")
+    @GetMapping("/{commentId}")
     public ResponseEntity<CommentResponse> getComment(@PathVariable Long commentId) {
         CommentResponse response = commentService.findById(commentId);
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/comments/{commentId}")
+    @PutMapping("/{commentId}")
     public ResponseEntity<Void> updateComment(@PathVariable Long commentId, @RequestBody CommentUpdateRequest request) {
         commentService.update(commentId, request);
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/comments/{commentId}")
+    @DeleteMapping("/{commentId}")
     public ResponseEntity<Void> deleteComment(@PathVariable Long commentId) {
         commentService.delete(commentId);
         return ResponseEntity.noContent().build();

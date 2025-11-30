@@ -50,22 +50,9 @@ public class CommentService {
     }
 
     public List<CommentResponse> findAll(Long groupPurchaseId) {
-        List<GroupPurchaseComment> comments = commentRepository.findAllByGroupPurchaseId(groupPurchaseId);
-        Map<Long, CommentResponse> commentResponseMap = comments.stream()
+        List<GroupPurchaseComment> rootComments = commentRepository.findAllByGroupPurchaseIdAndParentIsNull(groupPurchaseId);
+        return rootComments.stream()
                 .map(CommentResponse::new)
-                .collect(Collectors.toMap(CommentResponse::getId, c -> c));
-
-        commentResponseMap.values().forEach(commentResponse -> {
-            if (commentResponse.getParentId() != null) {
-                CommentResponse parentResponse = commentResponseMap.get(commentResponse.getParentId());
-                if (parentResponse != null) {
-                    parentResponse.getChildren().add(commentResponse);
-                }
-            }
-        });
-
-        return commentResponseMap.values().stream()
-                .filter(c -> c.getParentId() == null)
                 .collect(Collectors.toList());
     }
 

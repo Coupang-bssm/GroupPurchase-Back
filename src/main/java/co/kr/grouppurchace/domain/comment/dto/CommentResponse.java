@@ -27,5 +27,8 @@ public class CommentResponse {
         if (comment.getParent() != null) {
             this.parentId = comment.getParent().getId();
         }
+        for (GroupPurchaseComment childComment : comment.getChildren()) {
+            this.children.add(new CommentResponse(childComment));
+        }
     }
 }

@@ -8,4 +8,5 @@ import java.util.List;
 public interface GroupPurchaseCommentRepository extends JpaRepository<GroupPurchaseComment, Long> {
 
     List<GroupPurchaseComment> findAllByGroupPurchaseId(Long groupPurchaseId);
+    List<GroupPurchaseComment> findAllByGroupPurchaseIdAndParentIsNull(Long groupPurchaseId);
 }
