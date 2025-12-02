@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,9 +22,9 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping("/{gpId}")
-    public ResponseEntity<Void> createComment(@AuthenticationPrincipal User user, @PathVariable Long gpId, @RequestBody CommentSaveRequest request) {
+    public ResponseEntity<Map<String, String>> createComment(@AuthenticationPrincipal User user, @PathVariable Long gpId, @RequestBody CommentSaveRequest request) {
         Long commentId = commentService.save(user.getId(), gpId, request);
-        return ResponseEntity.created(URI.create("/api/comments/" + commentId)).build();
+        return ResponseEntity.created(URI.create("/api/comments/" + commentId)).body(Map.of("message", "댓글이 등록되었습니다."));
     }
 
     @GetMapping
@@ -45,8 +46,8 @@ public class CommentController {
     }
 
     @DeleteMapping("/{commentId}")
-    public ResponseEntity<Void> deleteComment(@PathVariable Long commentId) {
+    public ResponseEntity<Map<String, Object>> deleteComment(@PathVariable Long commentId) {
         commentService.delete(commentId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().body(Map.of("commentId", commentId, "message", "댓글이 삭제되었습니다."));
     }
 }
