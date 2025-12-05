@@ -34,10 +34,16 @@ public class AuthService {
             throw new IllegalArgumentException("Username already in use");
         }
 
+        String role = request.getRole();
+        if (!role.startsWith("ROLE_")) {
+            role = "ROLE_" + role;
+        }
+
         User user = User.builder()
                 .email(request.getEmail())
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
+                .role(role)
                 .build();
 
         userRepository.save(user);
@@ -50,8 +56,7 @@ public class AuthService {
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
+        User user = (User) authentication.getPrincipal();
 
         String accessToken = jwtTokenProvider.generateAccessToken(user);
         String refreshToken = jwtTokenProvider.generateRefreshToken(user);

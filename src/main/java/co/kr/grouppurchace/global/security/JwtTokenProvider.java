@@ -1,12 +1,12 @@
 package co.kr.grouppurchace.global.security;
 
+import co.kr.grouppurchace.domain.user.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -30,26 +30,30 @@ public class JwtTokenProvider {
         this.refreshTokenValidityInMs = refreshTokenValidity * 1000L;
     }
 
-    public String generateAccessToken(UserDetails userDetails) {
-        return buildToken(userDetails.getUsername(), accessTokenValidityInMs);
-    }
-
-    public String generateRefreshToken(UserDetails userDetails) {
-        return buildToken(userDetails.getUsername(), refreshTokenValidityInMs);
-    }
-
-    private String buildToken(String subject, long validityInMs) {
+    public String generateAccessToken(User user) {
         Date now = new Date();
-        Date expiry = new Date(now.getTime() + validityInMs);
+        Date expiry = new Date(now.getTime() + accessTokenValidityInMs);
         return Jwts.builder()
-                .setSubject(subject)
+                .setSubject(user.getId().toString())
+                .claim("role", user.getRole())
                 .setIssuedAt(now)
                 .setExpiration(expiry)
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public String getUsernameFromToken(String token) {
+    public String generateRefreshToken(User user) {
+        Date now = new Date();
+        Date expiry = new Date(now.getTime() + refreshTokenValidityInMs);
+        return Jwts.builder()
+                .setSubject(user.getId().toString())
+                .setIssuedAt(now)
+                .setExpiration(expiry)
+                .signWith(secretKey, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public String getUserIdFromToken(String token) {
         return parseClaims(token).getSubject();
     }
 
