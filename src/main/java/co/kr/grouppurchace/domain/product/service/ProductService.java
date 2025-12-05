@@ -5,6 +5,8 @@ import co.kr.grouppurchace.domain.product.dto.ProductSaveRequest;
 import co.kr.grouppurchace.domain.product.dto.ProductUpdateRequest;
 import co.kr.grouppurchace.domain.product.entity.Product;
 import co.kr.grouppurchace.domain.product.repository.ProductRepository;
+import co.kr.grouppurchace.global.exception.EntityNotFoundException;
+import co.kr.grouppurchace.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +29,7 @@ public class ProductService {
     @Transactional
     public void update(Long productId, ProductUpdateRequest request) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.PRODUCT_NOT_FOUND));
         product.update(request.getName(), request.getDescription(), request.getPrice(), request.getImageUrl());
     }
 
@@ -38,7 +40,7 @@ public class ProductService {
 
     public ProductResponse findById(Long productId) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.PRODUCT_NOT_FOUND));
         return new ProductResponse(product);
     }
 

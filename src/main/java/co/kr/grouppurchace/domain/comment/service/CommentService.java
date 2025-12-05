@@ -9,13 +9,13 @@ import co.kr.grouppurchace.domain.groupPurchase.entity.GroupPurchase;
 import co.kr.grouppurchace.domain.groupPurchase.repository.GroupPurchaseRepository;
 import co.kr.grouppurchace.domain.user.entity.User;
 import co.kr.grouppurchace.domain.user.repository.UserRepository;
+import co.kr.grouppurchace.global.exception.EntityNotFoundException;
+import co.kr.grouppurchace.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,14 +30,14 @@ public class CommentService {
     @Transactional
     public Long save(Long userId, Long groupPurchaseId, CommentSaveRequest request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
         GroupPurchase groupPurchase = groupPurchaseRepository.findById(groupPurchaseId)
-                .orElseThrow(() -> new RuntimeException("GroupPurchase not found"));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.GROUP_PURCHASE_NOT_FOUND));
 
         GroupPurchaseComment parent = null;
         if (request.getParentId() != null) {
             parent = commentRepository.findById(request.getParentId())
-                    .orElseThrow(() -> new RuntimeException("Parent comment not found"));
+                    .orElseThrow(() -> new EntityNotFoundException(ErrorCode.COMMENT_NOT_FOUND));
         }
 
         GroupPurchaseComment comment = GroupPurchaseComment.builder()
@@ -58,21 +58,21 @@ public class CommentService {
 
     public CommentResponse findById(Long commentId) {
         GroupPurchaseComment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new RuntimeException("Comment not found"));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.COMMENT_NOT_FOUND));
         return new CommentResponse(comment);
     }
 
     @Transactional
     public void update(Long commentId, CommentUpdateRequest request) {
         GroupPurchaseComment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new RuntimeException("Comment not found"));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.COMMENT_NOT_FOUND));
         comment.update(request.getContent());
     }
 
     @Transactional
     public void delete(Long commentId) {
         GroupPurchaseComment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new RuntimeException("Comment not found"));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.COMMENT_NOT_FOUND));
         delete(comment);
     }
 

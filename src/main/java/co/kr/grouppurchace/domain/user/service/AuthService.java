@@ -7,6 +7,9 @@ import co.kr.grouppurchace.domain.user.dto.UserResponse;
 import co.kr.grouppurchace.domain.user.entity.User;
 import co.kr.grouppurchace.domain.user.repository.UserRepository;
 import co.kr.grouppurchace.global.security.JwtTokenProvider;
+import co.kr.grouppurchace.global.exception.ConflictException;
+import co.kr.grouppurchace.global.exception.EntityNotFoundException;
+import co.kr.grouppurchace.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,10 +31,10 @@ public class AuthService {
     @Transactional
     public UserResponse signup(SignupRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new IllegalArgumentException("Email already in use");
+            throw new ConflictException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new IllegalArgumentException("Username already in use");
+            throw new ConflictException(ErrorCode.USERNAME_ALREADY_EXISTS);
         }
 
         String role = request.getRole();
@@ -71,11 +74,11 @@ public class AuthService {
     public UserResponse me() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
-            throw new IllegalStateException("User not authenticated");
+            throw new EntityNotFoundException(ErrorCode.USER_NOT_AUTHENTICATED);
         }
         String email = authentication.getName();
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
         return new UserResponse(user);
     }
 }

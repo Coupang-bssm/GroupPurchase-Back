@@ -11,6 +11,8 @@ import co.kr.grouppurchace.domain.product.entity.Product;
 import co.kr.grouppurchace.domain.product.repository.ProductRepository;
 import co.kr.grouppurchace.domain.user.entity.User;
 import co.kr.grouppurchace.domain.user.repository.UserRepository;
+import co.kr.grouppurchace.global.exception.EntityNotFoundException;
+import co.kr.grouppurchace.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,16 +32,16 @@ public class GroupPurchaseService {
     @Transactional
     public Long open(Long userId, GroupPurchaseSaveRequest request) {
         Product product = productRepository.findById(request.getProductId())
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.PRODUCT_NOT_FOUND));
         User host = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
         return groupPurchaseRepository.save(request.toEntity(product, host)).getId();
     }
 
     @Transactional
     public void update(Long groupPurchaseId, GroupPurchaseUpdateRequest request) {
         GroupPurchase groupPurchase = groupPurchaseRepository.findById(groupPurchaseId)
-                .orElseThrow(() -> new RuntimeException("GroupPurchase not found"));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.GROUP_PURCHASE_NOT_FOUND));
         groupPurchase.update(request.getTitle(), request.getDescription(), request.getTargetCount(), request.getDeadline(), request.getStatus());
     }
 
@@ -50,7 +52,7 @@ public class GroupPurchaseService {
 
     public GroupPurchaseResponse findById(Long groupPurchaseId) {
         GroupPurchase groupPurchase = groupPurchaseRepository.findById(groupPurchaseId)
-                .orElseThrow(() -> new RuntimeException("GroupPurchase not found"));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.GROUP_PURCHASE_NOT_FOUND));
         return new GroupPurchaseResponse(groupPurchase);
     }
 
@@ -61,9 +63,9 @@ public class GroupPurchaseService {
     @Transactional
     public Long join(Long userId, Long groupPurchaseId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
         GroupPurchase groupPurchase = groupPurchaseRepository.findById(groupPurchaseId)
-                .orElseThrow(() -> new RuntimeException("GroupPurchase not found"));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.GROUP_PURCHASE_NOT_FOUND));
         GroupPurchaseJoin join = GroupPurchaseJoin.builder()
                 .groupPurchase(groupPurchase)
                 .user(user)
@@ -75,7 +77,7 @@ public class GroupPurchaseService {
     @Transactional
     public void approve(Long joinId) {
         GroupPurchaseJoin join = groupPurchaseJoinRepository.findById(joinId)
-                .orElseThrow(() -> new RuntimeException("GroupPurchaseJoin not found"));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.GROUP_PURCHASE_JOIN_NOT_FOUND));
         join.approve();
     }
 
