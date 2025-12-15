@@ -21,7 +21,7 @@ public class HealthyCheckController {
     @Scheduled(fixedRate = 15 * 60 * 1000)
     public void pingSelf() {
         try {
-            String url = "https://speakcheck-back.onrender.com";
+            String url = "https://grouppurchase-back.onrender.com";
             String response = restTemplate.getForObject(url, String.class);
             System.out.println("Self-ping success: " + response);
         } catch (Exception e) {
